@@ -1,0 +1,155 @@
+name: claims
+layers:
+  raw:
+    write_mode: overwrite_partition
+    version: 1
+    description: Metrics of user visits as in the original source
+    owner: armando.n90@gmail.com
+    retention_policy: permanent
+    schema:
+      email:
+        data_type: string
+        is_primary_key: True
+        is_nullable: False
+        is_partition: False
+        comment: 'Email of the user'
+      jyv:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'No description provided'
+      Badmail:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'Indicates if the email could not be validates'
+      Baja:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'No description provided'
+      'Fecha envio':
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'Date when the metrics were sent'
+      'Fecha open':
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'Date when the page was open'
+      Opens:
+        data_type: integer
+        is_nullable: True
+        is_partition: False
+        comment: 'Amount of opens'
+      'Opens virales':
+        data_type: integer
+        is_nullable: True
+        is_partition: False
+        comment: 'Amount of massive opens'
+      'Fecha click':
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'Date when the clicks were executed'
+      Clicks:
+        data_type: integer
+        is_nullable: True
+        is_partition: False
+        comment: Amount of clicks'
+      'Clicks virales':
+        data_type: integer
+        is_nullable: True
+        is_partition: False
+        comment: 'Amount of massive clicks'
+      Links:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'Links'
+      IPs:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'Logical Addresses'
+      Navegadores:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'Browsers'
+      Plataformas:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'Platforms'
+  audit:
+    write_mode: merge_incremental
+    version: 1
+    description: Metrics of user visits audited
+    owner: armando.n90@gmail.com
+    retention_policy: permanent
+    schema:
+      Email:
+        rename_from: email
+        validations:
+          - validation: is_not_null
+          - validation: is_email_format
+      Jyv:
+        rename_from: jyv
+      Badmail:
+        validations:
+          - validation: is_in_list
+            allowed: 'HARD'
+      Baja:
+        validations:
+          - validation: is_in_list
+            allowed: 'SI'
+      FechaEnvio:
+        rename_from: 'Fecha envio'
+        data_type: timestamp
+        validations:
+          - validation: is_date_format
+            format: '%d/%m/%Y %H:%m'
+      FechaOpen:
+        rename_from: 'Fecha open'
+        data_type: timestamp
+        validations:
+          - validation: is_date_format
+            format: '%d/%m/%Y %H:%m'
+      Opens:
+        validations:
+          - validation: is_in_bounds
+            min_allowed: 0
+            max_allowed: 20
+      OpensVirales:
+        rename_from: 'Opens virales'
+        validations:
+          - validation: is_in_bounds
+            min_allowed: 0
+            max_allowed: 20
+      FechaClick:
+        rename_from: 'Fecha click'
+        data_type: timestamp
+        validations:
+          - validation: is_date_format
+            format: '%d/%m/%Y %H:%m'
+      Clicks:
+        validations:
+          - validation: is_in_bounds
+            min_allowed: 0
+            max_allowed: 20
+      ClicksVirales:
+        rename_from: 'Clicks virales'
+        validations:
+          - validation: is_in_bounds
+            min_allowed: 0
+            max_allowed: 20
+      Links:
+        rename_from: Links
+      IPs:
+        rename_from: IPs
+      Navegadores:
+        rename_from: Navegadores
+      Plataformas:
+        rename_from: Plataformas
