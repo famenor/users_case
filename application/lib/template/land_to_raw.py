@@ -137,6 +137,16 @@ class LandToRawTemplate(InterfaceLandToRawTemplate):
         self.dataframe = self.table_reader.read_table()
         self.metrics['initial_rows'] = self.dataframe.count()
 
+        if 'jk' in self.dataframe.columns:
+            self.dataframe = self.dataframe.withColumnRenamed('jk', 'jyv')
+
+        if 'fgh' in self.dataframe.columns:
+            self.dataframe = self.dataframe.withColumnRenamed('fgh', 'jyv')
+
+        for column in self.dataframe.columns:
+            new_column = column.replace(' ', '')
+            self.dataframe = self.dataframe.withColumnRenamed(column, new_column)
+
     #VALIDATE REQUIRED COLUMNS
     def validate_required_columns(self):
 

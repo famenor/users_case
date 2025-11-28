@@ -1,4 +1,4 @@
-name: claims
+name: visitas
 layers:
   raw:
     write_mode: overwrite_partition
@@ -28,12 +28,12 @@ layers:
         is_nullable: True
         is_partition: False
         comment: 'No description provided'
-      'Fecha envio':
+      Fechaenvio:
         data_type: string
         is_nullable: True
         is_partition: False
         comment: 'Date when the metrics were sent'
-      'Fecha open':
+      Fechaopen:
         data_type: string
         is_nullable: True
         is_partition: False
@@ -43,12 +43,12 @@ layers:
         is_nullable: True
         is_partition: False
         comment: 'Amount of opens'
-      'Opens virales':
+      Opensvirales:
         data_type: integer
         is_nullable: True
         is_partition: False
         comment: 'Amount of massive opens'
-      'Fecha click':
+      Fechaclick:
         data_type: string
         is_nullable: True
         is_partition: False
@@ -58,7 +58,7 @@ layers:
         is_nullable: True
         is_partition: False
         comment: Amount of clicks'
-      'Clicks virales':
+      Clicksvirales:
         data_type: integer
         is_nullable: True
         is_partition: False
@@ -106,41 +106,41 @@ layers:
           - validation: is_in_list
             allowed: 'SI'
       FechaEnvio:
-        rename_from: 'Fecha envio'
+        rename_from: Fechaenvio
         data_type: timestamp
         validations:
           - validation: is_date_format
-            format: '%d/%m/%Y %H:%m'
+            format: 'dd/MM/yyyy HH:mm'
       FechaOpen:
-        rename_from: 'Fecha open'
+        rename_from: Fechaopen
         data_type: timestamp
         validations:
           - validation: is_date_format
-            format: '%d/%m/%Y %H:%m'
+            format: 'dd/MM/yyyy HH:mm'
       Opens:
         validations:
           - validation: is_in_bounds
             min_allowed: 0
             max_allowed: 20
       OpensVirales:
-        rename_from: 'Opens virales'
+        rename_from: Opensvirales
         validations:
           - validation: is_in_bounds
             min_allowed: 0
             max_allowed: 20
       FechaClick:
-        rename_from: 'Fecha click'
+        rename_from: Fechaclick
         data_type: timestamp
         validations:
           - validation: is_date_format
-            format: '%d/%m/%Y %H:%m'
+            format: 'dd/MM/yyyy HH:mm'
       Clicks:
         validations:
           - validation: is_in_bounds
             min_allowed: 0
             max_allowed: 20
       ClicksVirales:
-        rename_from: 'Clicks virales'
+        rename_from: Clicksvirales
         validations:
           - validation: is_in_bounds
             min_allowed: 0
