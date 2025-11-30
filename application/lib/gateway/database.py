@@ -227,6 +227,33 @@ class SparkSQLDatabaseGateway(AbstractSQLDatabaseGateway):
         delta_table.alias('target').merge(dataframe.alias('source'), match_string
         ).whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
 
+    def merge_dataframe_with_altered_at(self, dataframe: DataFrame, catalog_name: str, schema_name: str, 
+                        table_name: str, match_columns: [], altered_at: str):
+        
+        complete_name = f'{catalog_name}.{schema_name}.{table_name}'
+        DeltaTable.createIfNotExists(spark).tableName(complete_name).addColumns(dataframe.schema).execute()
+
+        all_case = {}
+        for column in dataframe.columns:
+            if not column in ['metadata_created_at', 'metadata_updated_at', 'metadata_deleted_at']:
+                all_case[f'{column}'] = f'source.{column}'
+
+        create_case = all_case.copy()
+        create_case['metadata_created_at'] = f"'{altered_at}'"
+
+        update_case = all_case.copy()
+        update_case['metadata_updated_at'] = f"'{altered_at}'"
+
+        match_string = []
+        for column in match_columns:
+            match_string.append(f'target.{column}=source.{column}')
+
+        match_string = ' AND '.join(match_string)     
+        delta_table = DeltaTable.forName(spark, complete_name)
+
+        result = delta_table.alias('target').merge(dataframe.alias('source'), match_string
+        ).whenMatchedUpdate(set=update_case).whenNotMatchedInsert(values=create_case).execute()
+
     def read_table(self, catalog_name: str, schema_name: str, table_name: str, params: dict) -> DataFrame:
 
         read_mode = params['read_mode']

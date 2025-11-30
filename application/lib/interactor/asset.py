@@ -36,12 +36,24 @@ class AssetInteractor(InterfaceAssetInteractor):
     
     #MERGE A DATAFRAME INTO A TABLE IN THE DATABASE
     def merge_dataframe(self, dataframe: DataFrame, catalog_name: str, schema_name: str, 
-                        table_name: str, match_columns: list):       
+                        table_name: str, match_columns: list):  
+             
         self.database_gateway.merge_dataframe(dataframe=dataframe, 
                                              catalog_name=catalog_name, 
                                              schema_name=schema_name, 
                                              table_name=table_name, 
                                              match_columns=match_columns)
+        
+    #MERGE A DATAFRAME INTO A TABLE IN THE DATABASE WITH ALTERED AT DATES
+    def merge_dataframe_with_altered_at(self, dataframe: DataFrame, catalog_name: str, schema_name: str, 
+                                        table_name: str, match_columns: [], altered_at: str):
+        
+        self.database_gateway.merge_dataframe_with_altered_at(dataframe=dataframe, 
+                                                              catalog_name=catalog_name, 
+                                                              schema_name=schema_name, 
+                                                              table_name=table_name, 
+                                                              match_columns=match_columns, 
+                                                              altered_at=altered_at)
     
     #GET THE TOTAL OF ROWS IN A TABLE
     def get_total_rows(self, catalog_name: str, schema_name: str, table_name: str):

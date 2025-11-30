@@ -1,5 +1,5 @@
 email,jk,Badmail,Baja,Fecha envio,Fecha open,Opens,Opens virales,Fecha click,Clicks,Clicks virales,Links,IPs,Navegadores,Plataformas
-irmis_20@yahoo.com,,,,08/02/2013 18:30,-,0,0,-,0,0,-,-,-,-
+irmis_20@yahoo.com,,,,2013-02-08 18:30,-,0,0,-,0,0,-,-,-,-
 cachorrita175@yahoo.com,,,,08/02/2013 18:30,-,0,0,-,0,0,-,-,-,-
 ircaballero@prodigy.net.mx,,,,08/02/2013 18:30,-,0,0,-,0,0,-,-,-,-
 irfeda@yahoo.com,,HARD,,08/02/2013 18:30,-,0,0,-,0,0,-,-,-,-
@@ -40,7 +40,7 @@ jorge_galicia10@yahoo.com,,,,08/02/2013 18:30,-,0,0,-,0,0,-,-,-,-
 huertafien@hotmail.com,,,,08/02/2013 18:30,-,0,0,-,0,0,-,-,-,-
 intelligentyosi_16@yahoo.com,,,,08/02/2013 18:30,-,0,0,-,0,0,-,-,-,-
 jo68_7@yahoo.com,,,,08/02/2013 18:30,-,0,0,-,0,0,-,-,-,-
-jhosebh_19@yahoo.com,,,SI,08/02/2013 18:30,-,0,0,-,0,0,-,-,-,-
+jhosebh_19@yahoo.com,,,YES,08/02/2013 18:30,-,0,0,-,1000,0,-,-,-,-
 joey_lovedance@yahoo.com,,,,08/02/2013 18:30,-,0,0,-,0,0,-,-,-,-
 joselin_robles@yahoo.com,,,,08/02/2013 18:30,-,0,0,-,0,0,-,-,-,-
 jossievelazquez@yahoo.com,,,SI,08/02/2013 18:30,-,0,0,-,0,0,-,-,-,-

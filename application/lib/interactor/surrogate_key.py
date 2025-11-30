@@ -3,6 +3,10 @@ import pandas as pd
 from abc import ABC, abstractmethod
 from lib.gateway.database import InterfaceDatabaseGateway
 
+import pyspark
+from pyspark.sql import DataFrame
+from pyspark.sql.functions import *
+
 
 ## THIS COMPONENT CONTAINS THE CODE MODULES FOR INTERACTORS WITH SURROGATE KEYS
 
@@ -11,6 +15,12 @@ class InterfaceSurrogateKeyInteractor(ABC):
 
     @abstractmethod
     def assign_surrogate_key(self) -> int:
+        pass
+
+class InterfaceHashKeyInteractor(ABC):
+
+    @abstractmethod
+    def assign_hash_key(self, DataFrame, base_columns: list, target_column: str) -> DataFrame:
         pass
 
 #USE CASES FOR SURROGATE KEYS
@@ -46,3 +56,23 @@ class SurrogateKeyInteractor(InterfaceSurrogateKeyInteractor):
 
         else:
             return surrogate_id
+        
+class HashKeyInteractor(InterfaceHashKeyInteractor):
+
+    def __init__(self):
+        pass
+
+    #ASSING A HASH KEY TO A RECORD CONSIDERING BASE COLUMNS
+    def assign_hash_key(self, dataframe: DataFrame, base_columns: list, target_column: str) -> DataFrame:
+
+        base = []
+        for column in base_columns:
+            base.append(coalesce(col(column), lit('')))
+
+        dataframe = dataframe.withColumn('__temp_combined_columns__',
+            concat_ws("||", *base) 
+        ).withColumn(target_column, md5(col('__temp_combined_columns__'))).drop('__temp_combined_columns__')
+
+        return dataframe
+
+
