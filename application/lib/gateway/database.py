@@ -266,6 +266,9 @@ class SparkSQLDatabaseGateway(AbstractSQLDatabaseGateway):
             batch_id = params['batch_id']
             partition_column = 'metadata_batch_id'
             dataframe = spark.read.table(f'{catalog_name}.{schema_name}.{table_name}').filter(f"{partition_column} = '{batch_id}'")
+
+        elif read_mode == 'read_audit_passed':
+            dataframe = spark.read.table(f'{catalog_name}.{schema_name}.{table_name}').filter(f"metadata_audit_passed = true")
         
         else:
             raise Exception('Unsupported read mode: ' + str(read_mode))

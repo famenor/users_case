@@ -92,6 +92,7 @@ class GovernanceInteractor:
                                                           'is_partition': row['is_partition'], 
                                                           'is_pii': row['is_pii'], 
                                                           'validations': row['validations'],
+                                                          'track_changes': row['track_changes'],
                                                           'comment': row['comment']}
             
         return metadata

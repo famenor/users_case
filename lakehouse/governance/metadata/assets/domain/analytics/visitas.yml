@@ -9,6 +9,7 @@ layers:
     schema:
       email:
         data_type: string
+        is_pii: True
         is_primary_key: True
         is_nullable: False
         is_partition: False
@@ -153,3 +154,40 @@ layers:
         rename_from: Navegadores
       Plataformas:
         rename_from: Plataformas
+  historic:
+    write_mode: historic
+    version: 1
+    description: Metrics of user visits with history
+    owner: armando.n90@gmail.com
+    retention_policy: permanent
+    schema:
+      Email:
+        track_changes: True
+      Jyv:
+        track_changes: True
+      Badmail:
+        track_changes: True
+      Baja:
+        track_changes: True
+      FechaEnvio:
+        track_changes: True
+      FechaOpen:
+        track_changes: True
+      Opens:
+        track_changes: True
+      OpensVirales:
+        track_changes: True
+      FechaClick:
+        track_changes: True
+      Clicks:
+        track_changes: True
+      ClicksVirales:
+        track_changes: True
+      Links:
+        track_changes: True
+      IPs:
+        track_changes: True
+      Navegadores:
+        track_changes: True
+      Plataformas:
+        track_changes: True
