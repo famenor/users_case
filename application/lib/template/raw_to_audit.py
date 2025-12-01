@@ -60,7 +60,7 @@ class InterfaceRawToAuditTemplate(ABC):
 #IMPLEMENTATION FOR THE TEMPLATE
 class RawToAuditTemplate(InterfaceRawToAuditTemplate):
 
-    def __init__(self, catalog_name: str, schema_name: str, table_name: str, batch_id: str):
+    def __init__(self, catalog_name: str, schema_name: str, table_name: str, rundate: str, batch_id: str):
 
         self.catalog_name = catalog_name
         self.table_name = table_name
@@ -77,6 +77,7 @@ class RawToAuditTemplate(InterfaceRawToAuditTemplate):
         self.metadata = None
         
         self.metrics = {}
+        self.metrics['rundate'] = rundate
         self.metrics['batch_id'] = batch_id
         self.metrics['loaded_at'] = pd.Timestamp.utcnow().strftime('%Y-%m-%d %H:%M:%S')
         self.metrics['initial_rows'] = None
@@ -288,13 +289,14 @@ class RawToAuditTemplate(InterfaceRawToAuditTemplate):
     def generate_ingestion_metrics(self):
 
         print('Generating ingestion metrics ...')
-        columns = ['table_id', 'catalog_name', 'schema_name', 'table_name', 'batch_id', 'loaded_at', 
+        columns = ['table_id', 'catalog_name', 'schema_name', 'table_name', 'rundate', 'batch_id', 'loaded_at', 
                    'etl_module', 'write_mode', 'initial_rows', 'final_rows', 'accumulated_rows', 'quality']
 
         ingestion_metrics = [(self.metadata['table_id'],
                               self.metadata['catalog_name'], 
                               self.metadata['schema_name'], 
                               self.metadata['table_name'], 
+                              self.metrics['rundate'],
                               self.metrics['batch_id'], 
                               self.metrics['loaded_at'], 
                               self.metadata['etl_module'], 

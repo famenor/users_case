@@ -72,7 +72,8 @@ class AuditToHistoricTemplate(InterfaceAuditToHistoricTemplate):
         self.dataframe_historic = None
         
         self.metrics = {}
-        self.metrics['batch_id'] = 'unique'
+        self.metrics['rundate'] = 'all'
+        self.metrics['batch_id'] = 'all'
         self.metrics['loaded_at'] = pd.Timestamp.utcnow().strftime('%Y-%m-%d %H:%M:%S')
         self.metrics['initial_rows'] = None
         self.metrics['final_rows'] = None
@@ -181,7 +182,7 @@ class AuditToHistoricTemplate(InterfaceAuditToHistoricTemplate):
                                                                     concat_ws('+', *array_source_columns), 'NO_ACTION')
                                                         .when(merge_dataframe['is_current'] == False, 'NO ACTION')
                                                         .when(merge_dataframe[source_primary_key].isNull() & merge_dataframe.is_current, 'DELETE')
-                                                        .when(merge_dataframe[source_primary_key].isNull(), 'INSERT')
+                                                        .when(merge_dataframe[self.primary_key].isNull(), 'INSERT')
                                                         .otherwise('UPDATE'))
         
         print('Rows with no action: ' + str(merge_dataframe.filter(col('action') == 'NO_ACTION').count()))
@@ -214,7 +215,7 @@ class AuditToHistoricTemplate(InterfaceAuditToHistoricTemplate):
         df_merge_part_04C = df_merge_part_04C.select(array_history_columns)
 
         #UNION
-        self.dataframe_historic = df_merge_part_01.unionAll(df_merge_part_02A).unionAll(df_merge_part_03).unionAll(df_merge_part_04B).unionAll(df_merge_part_04C)
+        self.dataframe_historic = df_merge_part_01.unionAll(df_merge_part_02B).unionAll(df_merge_part_03).unionAll(df_merge_part_04B).unionAll(df_merge_part_04C)
 
         count = self.dataframe_historic.count()
         self.metrics['final_rows'] = count
@@ -234,13 +235,14 @@ class AuditToHistoricTemplate(InterfaceAuditToHistoricTemplate):
     def generate_ingestion_metrics(self):
 
         print('Generating ingestion metrics ...')
-        columns = ['table_id', 'catalog_name', 'schema_name', 'table_name', 'batch_id', 'loaded_at', 
+        columns = ['table_id', 'catalog_name', 'schema_name', 'table_name', 'rundate', 'batch_id', 'loaded_at', 
                    'etl_module', 'write_mode', 'initial_rows', 'final_rows', 'accumulated_rows', 'quality']
 
         ingestion_metrics = [(self.metadata['table_id'],
                               self.metadata['catalog_name'], 
                               self.metadata['schema_name'], 
                               self.metadata['table_name'], 
+                              self.metrics['rundate'],
                               self.metrics['batch_id'], 
                               self.metrics['loaded_at'], 
                               self.metadata['etl_module'], 
