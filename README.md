@@ -487,7 +487,7 @@ Contiene las clases concretas e interfaces utilizadas por los procesos principal
 
 a) *Gateways* para interactuar con la Base de Datos (archivos Delta de Databricks) y archivos planos.
 
-b) *Hooks* de preprocesamiento en la capa audit.
+b) *Hooks* de preprocesamiento en la capa *audit*.
 
 c) *Interactors* para activos de datos, tablas de gobierno, llaves surrogadas y validaciones.
 
@@ -527,13 +527,13 @@ Contiene la estructura de archivos utilizada en el servidor real, se utiliza com
 
 ## 5.- DISCUSION Y MEJORAS
 
-En esta última sección se discute algunos aspectos técnicos y posibles implementaciones a futuro.
+En esta última sección se discuten algunos aspectos técnicos y posibles implementaciones a futuro.
 
 ### Enfoque de Metadatos
 
-El enfoque de metadatos fue muy útil para ejecutar tareas repetitivas, nuevos archivos que tengan patrones similares podrían ser procesados rápidamente y se tendría un éstandar para documentación. La dificultad es que se tienen que implementar validaciones de los archivos YAML y comunmente habrá situaciones que se salgan de los patrones comunes, sin embargo para estos últimos se puede hacer uso de **Hooks** como se hizo en el proceso de auditoria.
+El enfoque de metadatos fue muy útil para ejecutar tareas repetitivas, nuevos archivos que tengan patrones similares podrían ser procesados rápidamente y se tendría un éstandar para documentación. La dificultad es que se tienen que implementar validaciones de los archivos YAML y comunmente habrá situaciones que se salgan de los patrones comunes, sin embargo para estos últimos se puede hacer uso de **hooks** como se hizo en el proceso de auditoría.
 
-Como trabajo a futuro quedaría plantear cómo se pueden especificar los *hooks*, las tablas oro y los entregables en los metádos.
+Como trabajo a futuro quedaría plantear cómo se pueden especificar los *hooks*, las tablas oro y los entregables en los metadatos.
 
 ### Arquitectura de Software
 
@@ -589,7 +589,7 @@ class RawToAuditTemplate(InterfaceRawToAuditTemplate):
         self.write_errors()
 ~~~
 
-- Uso de fábricas abstractas (patrón de diseño **abstract factory**) para crear los grupos de objectos que las platillas necesitan para funcionar.
+- Uso de fábricas abstractas (patrón de diseño **abstract factory**) para crear los grupos de objectos que las plantillas necesitan para funcionar.
 
 ~~~python
 #ABTRACT FACTORY WITH METHODS TO BE IMPLEMENTED
@@ -616,7 +616,7 @@ class FactoryRawToAuditForVisit(AbstractFactoryRawToAudit):
         self.hook_preprocessing = HookVisitsPreprocessing()
 ~~~
 
-- Uso de clases especializadas para exteder la funcionalidad sin comprometer la funcionalidad base:
+- Uso de clases especializadas para extender la funcionalidad sin comprometer la funcionalidad base:
 
 ~~~python
 class InterfaceScreenValidator(ABC):
@@ -713,7 +713,7 @@ class HookVisitsPreprocessing(InterfaceHookRawToAuditPreprocessing):
         return dataframe
 ~~~
 
-El *hook* anterior se utilizó para preprocesar la tabla visitas en la capa de auditoría, se incorporó a la platilla mediante su **fábrica abstracta**.
+El *hook* anterior se utilizó para preprocesar la tabla de visitas en la capa de auditoría, se incorporó a la plantilla mediante su **fábrica abstracta**.
 
 ### Llaves Surrogadas
 
@@ -721,7 +721,7 @@ Para las primeras tablas se utilizaron **llaves incrementales**, sin embargo est
 
 ### Llaves Primarias
 
-Para futuras versiones se tendría que mejorar la gestión de llaves primarias, en particular los registros con errores de este tipo fueron los unicos descartados por qué provocaban errores con los mecanismos **MERGE** de las tablas Delta. También se tiene que soportar casos donde haya llaves primarias de dos o más columnas.
+Para futuras versiones se tendría que mejorar la gestión de llaves primarias, en particular los registros con errores de este tipo fueron los únicos descartados por qué provocaban errores con los mecanismos **MERGE** de las tablas Delta. También se tendría que dar soporte a los casos donde haya llaves primarias de dos o más columnas.
 
 ### Tablas Históricas
 
@@ -733,11 +733,11 @@ Si bien en los metadatos existe una especificación para la versión, aún no ha
 
 ### Campos con datos personales
 
-Si bien en los metadatos también existe esta especificación para el *Email* del ejercicio, no se ejecutó ninguna acción al respecto, habría que plantear algún mecanismo de **encriptación** y **desencriptación** así como políticas de quien puede acceder a estos campos (parte de esta información podría ser integrada en los metadatos).
+Si bien en los metadatos también existe esta especificación para el *Email* del ejercicio, no se ejecutó ninguna acción al respecto, habría que plantear algún mecanismo de **encriptación** y **desencriptación** así como políticas de quién puede acceder a estos campos (parte de esta información podría ser integrada en los metadatos).
 
 ### Particionado
 
-Al igual que los dos puntos anteriores, no hay aún soporte para particiones especificadas en los metadatos. Por default se particionó considerando la columna *metatadata_batch_id* para las capa *raw*.
+Al igual que en los dos puntos anteriores, no hay aún soporte para particiones especificadas en los metadatos. Por default se particionó considerando la columna *metadata_batch_id* para las capa *raw*.
 
 ### Llaves Foraneas y Validaciones entre Tablas
 
@@ -745,7 +745,7 @@ En esta versión no hay soporte para validaciones que impliquen múltiples tabla
 
 ### Soporte para otros Formatos de Tabla
 
-En esta implementación existe una dependencia total hacia los *dataframes* de Pyspark, si se quisiera tener soporte para manejo de otros tipos de *dataframe* como *pandas* o algún otro motor **big data** un posible planteamiento es mediante el uso de *dataclass* abstractos que contengan una interfaz de *dataframe* y delegar a subclases concretas para cada motor la funcionalidad particular. Sin embargo este enfoque podría complicarse en casos donde existan muchos casos de uso o no todos los motores manejen la misma funcionalidad.
+En esta implementación existe una dependencia total hacia los *dataframes* de Pyspark, si se quisiera tener soporte para manejo de otros tipos de *dataframe* como *pandas* o algún otro motor **big data**, un posible planteamiento es mediante el uso de *dataclass* abstractos que contengan una interfaz de *dataframe* y delegar a subclases concretas para cada motor la funcionalidad particular. Sin embargo este enfoque podría complicarse en casos donde existan muchos casos de uso o no todos los motores manejen la misma funcionalidad.
 
 ### Soporte para Tipos de Escritura
 
