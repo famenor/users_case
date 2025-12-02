@@ -296,20 +296,20 @@ En un ambiente productivo solo sería necesario un **DAG** programado para ejecu
 
 ## 2.- PERFILAMIENTO DE DATOS
 
-El perfil de los datos es un paso importante con el cual fue posible definir parte de los metadados, validaciones y tipos de datos necesarios durante el procesamiento.
+El perfil de los datos es un paso importante con el cual fue posible definir parte de los metadatos, validaciones y tipos de datos necesarios durante el procesamiento.
 
-A continuación se listan algunos problemas encontrados.
+A continuación se listan algunos problemas o rasgos encontrados:
 
 - En el batch 7 hay dos registros con el mismo Email, para este ejercicio se asumurá que no se puede repetir un Email en el mismo batch.
 - Las columnas no estaban homologadas, concretamente las columnas jk y fhg se renombraron por jyv:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/13_perfil_columnas.jpg)
 
-- La columns jvy tiene todos los valores nulos.
+- La columna jvy tiene todos los valores nulos.
 - Badmail puede ser nulo o HARD.
 - Baja puede ser nulo o SI.
 - En algunas columnas el valor nulo está representado por un guión medio.
-- Fechas de envio, open y click tienen fechas con formato dd/MM/yyyy HH:mm
+- Las fechas de envio, open y click tienen fechas con formato dd/MM/yyyy HH:mm
 - Opens, Opens virales, Clicks y Clicks virales son enteros con valores entre 0 y 10.
 - Links, IPs, Navegadores y Plataformas contienen arreglos o valores simples, sin embargo a veces hay valores Unknown o elementos nulos en las listas:
 
