@@ -4,8 +4,8 @@
 
   1 - Propuesta de Solución
   2 - Perfilamiento de Datos
-  3 - Generación de Tablas Intermedias
-  4 - Entregables
+  3 - ETL
+  4 - Estructura del Repositorio
   5 - Discusión
   
 ## 1.- PROPUESTA DE SOLUCIÓN
@@ -50,7 +50,7 @@ Para la ingesta de datos se crearon dos tablas, la primera almacena estadística
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/05_ingesta.jpg)
 
-mientras que la segunda tabla almacena los eventos de error (bitácora):
+mientras que la segunda tabla almacena los **eventos de error** (bitácora):
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/06_eventos_error.jpg)
 
@@ -62,7 +62,7 @@ La creación de las tablas de gobierno de datos (metadatos y métricas) se imple
 
 ### Enfoque de metadatos
 
-En la sección anterior se mostraron dos tablas de gobierno con datos referentes a las tablas ingestadas y sus columnas, esta información se capturó a partir de archivos YAML en los que describe el estado deseado de la tabla antes de ser procesada, si bien este enfoque puede ser complicado de implementar, es posible facilitar tareas repetitivas y mejorar la documentación de los activos de datos. 
+En la sección anterior se mostraron dos tablas de gobierno con datos referentes a las tablas ingestadas y sus columnas, esta información se capturó a partir de archivos **YAML** en los que describe el estado deseado de la tabla antes de ser procesada, si bien este enfoque puede ser complicado de implementar, es posible facilitar tareas repetitivas y mejorar la documentación de los activos de datos. 
 
 Para este ejercicio se implementó un enfoque declarativo para algunas de las tareas más comunes y repetitivas, se propuso el siguiente formato:
 
@@ -270,7 +270,7 @@ En el cuaderno appendix_b_metadata_manager se realizó la ingesta de los metadat
 
 ### Almacenamiento
 
-Las tablas intermedias serán almacenadas en el lakehouse de Databricks siguiendo las convensiones antes mencionadas, para la Base de Datos de entregables se utilizará el motor de DuckDB para emular la Base de Datos en MySQL, las sentencias SQL utilizadas son compatibles entre ambos motores. La creación de tablas se ejecutó en el cuaderno appendix_c_init_data_base:
+Las tablas intermedias serán almacenadas en el **lakehouse** de Databricks siguiendo las convensiones antes mencionadas, para la Base de Datos de entregables se utilizará el motor de **DuckDB** para emular la Base de Datos en **MySQL**, las sentencias SQL utilizadas son compatibles entre ambos motores. La creación de tablas se ejecutó en el cuaderno appendix_c_init_data_base:
 
 - Tabla visitor con conteos de visitas por usuario.
 - Tabla statistics con los registros recibidos en cada batch.
@@ -279,6 +279,23 @@ Las tablas intermedias serán almacenadas en el lakehouse de Databricks siguiend
 ![](https://github.com/famenor/users_case/blob/main/pictures/09_tablas_duckdb.jpg)
 
 ### Orquestación 
+
+El ETL se dividió en 4 etapas que más adelante se detallarán, cada etapa se ejecuta en un cuaderno en Databricks, para ejecutarlas se creó una **canalización**, la cual está representada en el siguiente grafo:
+
+![](https://github.com/famenor/users_case/blob/main/pictures/10_tablas_duckdb.jpg)
+
+Los notebooks necesitan un **rundate** para saber qué archivos o tablas van a procesar, el rundate 20130208_000000 procesa los archivos con batches 7 y 8; mientras que el rundate 20130214_000000 procesa el archivo con batch 9.
+
+Se utilizó el orquestador **Airflow** para ejecutar bajo demanda cualquiera de las dos ejecuciones:
+
+![](https://github.com/famenor/users_case/blob/main/pictures/11_airflow.jpg)
+
+En un ambiente productivo solo sería necesario un **DAG** programado para ejecutar los rundates automáticamente, sin embargo para este ejercicio se crearon dos DAGs, los cuales envían los rundates 20130208_000000 y 20130214_000000 a Databricks bajo demanda respectivamente. 
+
+![](https://github.com/famenor/users_case/blob/main/pictures/12_airflow.jpg)
+
+## 2.- PERFILAMIENTO DE DATOS
+
 
 ~~~python
         #CHECK NULL VALUES
