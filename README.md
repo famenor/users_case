@@ -367,7 +367,7 @@ También se muestra cómo los comentarios capturados en los metadados YAML ahora
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/22_comentarios.jpg)
 
-Posteriormente se procede a generar la tabla de capa **audit**, ejecutando lo siguiente:
+Posteriormente se procede a generar la tabla de la capa **audit**, ejecutando lo siguiente:
 
 - Extraer metadatos (de tablas de gobierno) y tabla cruda (de capa raw).
 - Renombrar columnas conforme a lo declarado los metadatos.
@@ -379,7 +379,7 @@ Posteriormente se procede a generar la tabla de capa **audit**, ejecutando lo si
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/23_raw_to_audit.jpg)
 
-A continuación se muestra el mismo registro de la capa anterior, esta vez con los campos erroneos anulados y con una etiqueta que indica que no pasó la **auditoria**, otros campos que tenías guiones fueron sustituidos por valores nulos:
+A continuación se muestra el mismo registro de la capa anterior, esta vez con los campos erroneos anulados y con una etiqueta que indica que no pasó la **auditoría**, otros campos que tenían guiones fueron sustituidos por valores nulos:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/24_tabla_audit.jpg)
 
@@ -391,7 +391,7 @@ Y las métricas de ingesta hacia la capa audit de los tres batches:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/26_metrica_audit.jpg)
 
-Finalmente se procede a generar la tabla de capa **historic** ejecutando lo siguiente:
+Finalmente se procede a generar la tabla de la capa **historic** ejecutando lo siguiente:
 
 - Extraer metadatos (de tablas de gobierno) y tabla limpia (de capa audit, considerando solo registros que hayan cumplido la auditoría).
 - Consolidar cambios históricos, se generan registros cada vez que uno de los campos marcados para seguimiento tenga algún cambio.
@@ -411,3 +411,62 @@ También se generan métricas de ingesta:
 En este punto se han generado las tablas auditadas e históricas que servirán para construir las tablas de consumo final, el cuaderno 02_bronze_to_silver_tables contiene el código orquestado de esta sección.
 
 ### C) Generación de Tablas Oro
+
+El tercer proceso se encarga de generar las tablas oro, para este ejercicio se generó una tabla oro que contiene el resumen por usuario de las visitas realizadas:
+
+![](https://github.com/famenor/users_case/blob/main/pictures/30_tabla_oro.jpg)
+
+Cada vez que se ejecuta el rundate, esta tabla se actualiza mediante el cuaderno 03_gold_tables que contiene el código orquestado de esta sección.
+
+### D) Exportar a la Base de Datos
+
+El cuarto proceso se encarga de exportar los diferenciales a la Base de Datos, en todos los casos se utiliza un filtro para considerar los registros ligados al rundate correspondiente.
+
+La primera tabla a actualizar es visitor y contiene los datos de la tabla oro generada en el punto anterior:
+
+~~~sql
+WITH filter AS (
+    SELECT DISTINCT Email FROM domain_dev.silver_analytics.audit_visitas a
+    WHERE a.metadata_batch_id IN 
+    (
+        SELECT batch_id FROM governance_prod.metrics.ingestions 
+        WHERE rundate = '{rundate}' AND catalog_name='domain_dev' AND schema_name='silver_analytics' 
+        AND table_name='audit_visitas'
+    )
+)
+SELECT v.* FROM domain_dev.gold_analytics.visitor v
+INNER JOIN filter f ON v.Email = f.Email
+~~~
+
+![](https://github.com/famenor/users_case/blob/main/pictures/31_visitor.jpg)
+
+La segunda tabla a actualizar es statistic y contiene los datos de la tabla auditada de visitas:
+
+~~~sql
+WITH filter AS (
+    SELECT DISTINCT batch_id FROM governance_prod.metrics.ingestions 
+    WHERE rundate = '{rundate}' AND catalog_name='domain_dev' AND schema_name='silver_analytics' 
+        AND table_name='audit_visitas'
+)
+SELECT Email, Jyv, Badmail, Baja, FechaEnvio, FechaOpen, Opens, OpensVirales, FechaClick, Clicks, ClicksVirales,
+    Links, IPs, Navegadores, Plataformas, metadata_batch_id 
+FROM domain_dev.silver_analytics.audit_visitas v
+WHERE metadata_batch_id IN (SELECT batch_id FROM filter) AND v.metadata_audit_passed = TRUE
+~~~
+
+![](https://github.com/famenor/users_case/blob/main/pictures/32_statistic.jpg)
+
+La tercera tabla a actualizar es event_errors y contiene los datos de la bitácora de errores:
+
+~~~sql
+WITH filter AS (
+    SELECT DISTINCT batch_id FROM governance_prod.metrics.ingestions 
+    WHERE rundate = '{rundate}' AND catalog_name='domain_dev' AND schema_name='silver_analytics' 
+        AND table_name='audit_visitas'
+)
+SELECT *
+FROM governance_prod.metrics.event_errors v
+WHERE batch_id IN (SELECT batch_id FROM filter)
+~~~
+
+![](https://github.com/famenor/users_case/blob/main/pictures/33_event_errors.jpg)

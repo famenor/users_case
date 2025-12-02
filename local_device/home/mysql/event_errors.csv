@@ -1,0 +1,5 @@
+error_event_id,batch_id,screen_code,catalog_name,schema_name,table_name,column_name,record_identifier,original_value,replaced_value,error_condition
+1a7b33ba01bece2e3a2df4c8c4dab655,7,is_in_list,domain_dev,silver_analytics,audit_visitas,Baja,jhosebh_19@yahoo.com,YES,,Sin Resolver
+a722e68e512e2f798e1e64b70da313e2,7,is_date_format,domain_dev,silver_analytics,audit_visitas,FechaEnvio,irmis_20@yahoo.com,2013-02-08 18:30,,Sin Resolver
+9d5a3e5a741d0656178407047f4b81c3,7,is_primary_key,domain_dev,silver_analytics,audit_visitas,Email,mjesusvelazquez@yahoo.com,mjesusvelazquez@yahoo.com,,Sin Resolver
+119deb7333ebac6225a2da46fda4a75e,7,is_in_bounds,domain_dev,silver_analytics,audit_visitas,Clicks,jhosebh_19@yahoo.com,1000,,Sin Resolver
