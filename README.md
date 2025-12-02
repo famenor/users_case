@@ -56,7 +56,7 @@ mientras que la segunda tabla almacena los **eventos de error** (bitácora):
 
 Se aclara que con excepción del error de llave primeria, los demás errores fueron introducidos deliberadamente para fines del ejercicio.
 
-La creación de las tablas de gobierno de datos (metadatos y métricas) se implementó en el cuaderno appendix_a_init_governance, a continuación se muestra una captura en la sección de catálogos de Databricks donde se muestran los catálogos, esquemas y tablas de gobierno creados:
+La creación de las tablas de gobierno de datos (metadatos y métricas) se implementó en el cuaderno *appendix_a_init_governance*, a continuación se muestra una captura en la sección de catálogos de Databricks donde se muestran los catálogos, esquemas y tablas de gobierno creados:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/07_tablas_gobierno.jpg)
 
@@ -264,17 +264,17 @@ layers:
 
 Para la capa **raw** se capturan llaves primarias, si es dato personal, particiones, tipos de dato originales y el comentario de la columna; para la capa **audit** se especifican renombres, validaciones y tipos de dato finales; mientras que para la capa **historic** se especifican qué columnas serán seguidas para control de cambios. En algunos casos la información de una capa se replica a la capa siguiente cuando ésta sea necesaria y así evitar capturarla dos veces (pero se puede especificar si necesita cambiarse para la siguiente capa).
 
-En el cuaderno appendix_b_metadata_manager se realizó la ingesta de los metadatos especificados en el archivo YAML hacia las tablas de gobierno de datos correspondientes.
+En el cuaderno *appendix_b_metadata_manager* se realizó la ingesta de los metadatos especificados en el archivo YAML hacia las tablas de gobierno de datos correspondientes.
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/08_ingesta_metadatos.jpg)
 
 ### Almacenamiento
 
-Las tablas intermedias serán almacenadas en el **lakehouse** de Databricks siguiendo las convensiones antes mencionadas, para la Base de Datos de entregables se utilizará el motor de **DuckDB** para emular la Base de Datos en **MySQL**, las sentencias SQL utilizadas son compatibles entre ambos motores. La creación de tablas se ejecutó en el cuaderno appendix_c_init_data_base:
+Las tablas intermedias serán almacenadas en el **lakehouse** de Databricks siguiendo las convensiones antes mencionadas, para la Base de Datos de entregables se utilizará el motor de **DuckDB** para emular la Base de Datos en **MySQL**, las sentencias SQL utilizadas son compatibles entre ambos motores. La creación de tablas se ejecutó en el cuaderno *appendix_c_init_data_base*:
 
-- Tabla visitor con conteos de visitas por usuario.
-- Tabla statistics con los registros recibidos en cada batch.
-- Table event_errors con los registros de la bitacora de errores.
+- Tabla *visitor* con conteos de visitas por usuario.
+- Tabla *statistics* con los registros recibidos en cada *batch*.
+- Table *event_errors* con los registros de la bitacora de errores.
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/09_tablas_duckdb.jpg)
 
@@ -284,13 +284,13 @@ El ETL se dividió en 4 etapas que más adelante se detallarán, cada etapa se e
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/10_canalizacion.jpg)
 
-Los notebooks necesitan un **rundate** para saber qué archivos o tablas van a procesar, el rundate 20130208_000000 procesa los archivos con batches 7 y 8; mientras que el rundate 20130214_000000 procesa el archivo con batch 9.
+Los cuadernos necesitan un **rundate** para saber qué archivos o tablas van a procesar, el *rundate* 20130208_000000 procesa los archivos con batches 7 y 8; mientras que el *rundate* 20130214_000000 procesa el archivo con batch 9.
 
 Se utilizó el orquestador **Airflow** para ejecutar bajo demanda cualquiera de las dos ejecuciones:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/11_airflow.jpg)
 
-En un ambiente productivo solo sería necesario un **DAG** programado para ejecutar los rundates automáticamente, sin embargo para este ejercicio se crearon dos DAGs, los cuales envían los rundates 20130208_000000 y 20130214_000000 a Databricks bajo demanda respectivamente. 
+En un ambiente productivo solo sería necesario un **DAG** programado para ejecutar los rundates automáticamente, sin embargo para este ejercicio se crearon dos DAGs, los cuales envían los *rundates* 20130208_000000 y 20130214_000000 a Databricks bajo demanda respectivamente. 
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/12_airflow.jpg)
 
@@ -300,22 +300,22 @@ El perfil de los datos es un paso importante con el cual fue posible definir par
 
 A continuación se listan algunos problemas o rasgos encontrados:
 
-- En el batch 7 hay dos registros con el mismo Email, para este ejercicio se asumurá que no se puede repetir un Email en el mismo batch.
-- Las columnas no estaban homologadas, concretamente las columnas jk y fhg se renombraron por jyv:
+- En el *batch* 7 hay dos registros con el mismo Email, para este ejercicio se asumurá que no se puede repetir un Email en el mismo *batch*.
+- Las columnas no estaban homologadas, concretamente las columnas *jk* y *fhg* se renombraron por *jyv*:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/13_perfil_columnas.jpg)
 
-- La columna jvy tiene todos los valores nulos.
-- Badmail puede ser nulo o HARD.
-- Baja puede ser nulo o SI.
+- La columna *jvy* tiene todos los valores nulos.
+- *Badmail* puede ser nulo o HARD.
+- *Baja* puede ser nulo o SI.
 - En algunas columnas el valor nulo está representado por un guión medio.
-- Las fechas de envio, open y click tienen fechas con formato dd/MM/yyyy HH:mm
-- Opens, Opens virales, Clicks y Clicks virales son enteros con valores entre 0 y 10.
-- Links, IPs, Navegadores y Plataformas contienen arreglos o valores simples, sin embargo a veces hay valores Unknown o elementos nulos en las listas:
+- Las fechas de envio, *open* y *click* tienen fechas con formato dd/MM/yyyy HH:mm
+- *Opens*, *Opens virales*, *Clicks* y *Clicks virales* son enteros con valores entre 0 y 10.
+- *Links*, *IPs*, *Navegadores* y *Plataformas* contienen arreglos o valores simples, sin embargo a veces hay valores *Unknown* o elementos nulos en las listas:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/14_perfil_arreglos.jpg)
 
-En el cuaderno appendix_d_profiling se encuentra el perfilamiento realizado.
+En el cuaderno *appendix_d_profiling* se encuentra el perfilamiento realizado.
 
 ## 3.- ETL
 
@@ -323,35 +323,35 @@ El proceso ETL se dividió en 4 pasos que serán detallados en esta sección.
 
 ### A) Carga al Servidor
 
-Primero se copian los archivos de la fuente externa (carpeta files) hacia el servidor (carpeta server_device) y hacia la zona landing del **lakehouse** (carpeta lakehouse/landing):
+Primero se copian los archivos de la fuente externa (carpeta *files*) hacia el servidor (carpeta *server_device*) y hacia la zona *landing* del **lakehouse** (carpeta *lakehouse/landing*):
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/15_carga_servidor.jpg)
 
-Después se crea un archivo ZIP con el **respaldo** de los archivos fuente y se guarda en el almacenamiento local (carpeta local_device):
+Después se crea un archivo ZIP con el **respaldo** de los archivos fuente y se guarda en el almacenamiento local (carpeta *local_device*):
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/16_zip.jpg)
 
-Finalmente se eliminan los archivos del servidor (carpeta server_device):
+Finalmente se eliminan los archivos del servidor (carpeta *server_device*):
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/17_depurar_servidor.jpg)
 
-El cuaderno 01_server_load contiene el código orquestado de esta sección.
+El cuaderno *01_server_load* contiene el código orquestado de esta sección.
 
 ### B) Generación de Tablas Bronce y Plata
 
-El segundo proceso comienza buscando todos los batches (o archivos) asociados al rundate, si el batch ya ha sido procesado entonces éste será omitido:
+El segundo proceso comienza buscando todos los *batches* (o archivos) asociados al *rundate*, si el *batch* ya ha sido procesado entonces éste será omitido:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/18_no_reprocesar.jpg)
 
-Si el batch no ha sido procesado, entonces se ejecuta lo siguiente para la capa **RAW**:
+Si el *batch* no ha sido procesado, entonces se ejecuta lo siguiente para la capa **RAW**:
 
-- Extraer metadatos (de tablas de gobierno) y tabla fuente (de capa landing).
+- Extraer metadatos (de tablas de gobierno) y tabla fuente (de capa *landing*).
 - Validar que las columnas empaten con las declaradas en los metadatos.
 - Aplicar los tipos de datos definidos en los metadatos, estos tipos de datos no son finales, son los necesarios para poder almacer el dato aún con posibles errores.
 - Validar que las columnas declaradas como no nulas tengan datos completos.
 - Agregar comentarios de columnas.
 - Generar métricas de extracción.
-- Exportar tabla (hacia capa raw) y métricas.
+- Exportar tabla (hacia capa *raw*) y métricas.
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/19_land_to_raw.jpg)
 
@@ -359,7 +359,7 @@ A continuación se muestra uno de los registros que contiene errores (en este ca
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/20_tabla_raw.jpg)
 
-Y las métricas de ingesta hacia la capa raw de los tres batches:
+Y las métricas de ingesta hacia la capa *raw* de los tres *batches*:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/21_metrica_raw.jpg)
 
@@ -369,13 +369,13 @@ También se muestra cómo los comentarios capturados en los metadados YAML ahora
 
 Posteriormente se procede a generar la tabla de la capa **audit**, ejecutando lo siguiente:
 
-- Extraer metadatos (de tablas de gobierno) y tabla cruda (de capa raw).
+- Extraer metadatos (de tablas de gobierno) y tabla cruda (de capa *raw*).
 - Renombrar columnas conforme a lo declarado los metadatos.
 - Aplicar preprocesamiento específico.
 - Aplicar las validaciones declaradas en los metadatos.
 - Castear columnas con tipos de dato finales declarados en los metadatos.
 - Generar métricas de extracción.
-- Exportar tabla (hacia capa audit) y métricas.
+- Exportar tabla (hacia capa *audit*) y métricas.
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/23_raw_to_audit.jpg)
 
@@ -387,16 +387,16 @@ en la bitácora de errores se almacenan los problemas encontrados:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/25_errores_audit.jpg)
 
-Y las métricas de ingesta hacia la capa audit de los tres batches:
+Y las métricas de ingesta hacia la capa *audit* de los tres *batches*:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/26_metrica_audit.jpg)
 
 Finalmente se procede a generar la tabla de la capa **historic** ejecutando lo siguiente:
 
-- Extraer metadatos (de tablas de gobierno) y tabla limpia (de capa audit, considerando solo registros que hayan cumplido la auditoría).
+- Extraer metadatos (de tablas de gobierno) y tabla limpia (de capa *audit*, considerando solo registros que hayan cumplido la auditoría).
 - Consolidar cambios históricos, se generan registros cada vez que uno de los campos marcados para seguimiento tenga algún cambio.
 - Generar métricas de procesamiento.
-- Exportar tabla (hacia capa historic) y métricas.
+- Exportar tabla (hacia capa *historic*) y métricas.
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/27_audit_to_historic.jpg)
 
@@ -408,7 +408,7 @@ También se generan métricas de ingesta:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/29_metrica_historic.jpg)
 
-En este punto se han generado las tablas auditadas e históricas que servirán para construir las tablas de consumo final, el cuaderno 02_bronze_to_silver_tables contiene el código orquestado de esta sección.
+En este punto se han generado las tablas auditadas e históricas que servirán para construir las tablas de consumo final, el cuaderno *02_bronze_to_silver_tables* contiene el código orquestado de esta sección.
 
 ### C) Generación de Tablas Oro
 
@@ -416,13 +416,13 @@ El tercer proceso se encarga de generar las tablas oro, para este ejercicio se g
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/30_tabla_oro.jpg)
 
-Cada vez que se ejecuta el rundate, esta tabla se actualiza mediante el cuaderno 03_gold_tables que contiene el código orquestado de esta sección.
+Cada vez que se ejecuta el *rundate*, esta tabla se actualiza mediante el cuaderno *03_gold_tables* que contiene el código orquestado de esta sección.
 
 ### D) Exportar a la Base de Datos
 
-El cuarto proceso se encarga de exportar los diferenciales a la Base de Datos, en todos los casos se utiliza un filtro para considerar los registros ligados al rundate correspondiente.
+El cuarto proceso se encarga de exportar los diferenciales a la Base de Datos, en todos los casos se utiliza un filtro para considerar los registros ligados al *rundate* correspondiente.
 
-La primera tabla a actualizar es visitor y contiene los datos de la tabla oro generada en el punto anterior:
+La primera tabla a actualizar es *visitor* y contiene los datos de la tabla oro generada en el punto anterior:
 
 ~~~sql
 WITH filter AS (
@@ -440,7 +440,7 @@ INNER JOIN filter f ON v.Email = f.Email
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/31_visitor.jpg)
 
-La segunda tabla a actualizar es statistic y contiene los datos de la tabla auditada de visitas:
+La segunda tabla a actualizar es *statistic* y contiene los datos de la tabla auditada de visitas:
 
 ~~~sql
 WITH filter AS (
@@ -456,7 +456,7 @@ WHERE metadata_batch_id IN (SELECT batch_id FROM filter) AND v.metadata_audit_pa
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/32_statistic.jpg)
 
-La tercera tabla a actualizar es event_errors y contiene los datos de la bitácora de errores:
+La tercera tabla a actualizar es *event_errors* y contiene los datos de la bitácora de errores:
 
 ~~~sql
 WITH filter AS (
@@ -471,7 +471,7 @@ WHERE batch_id IN (SELECT batch_id FROM filter)
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/33_event_errors.jpg)
 
-El cuaderno 04_export_to_database contiene el código orquestado de esta sección, también hay una copia de los **entregables** con formato CSV en la carpeta /local_device/home/mysql.
+El cuaderno *04_export_to_database* contiene el código orquestado de esta sección, también hay una copia de los **entregables** con formato CSV en la carpeta */local_device/home/mysql*.
 
 ## 4.- ESTRUCTURA DEL REPOSITORIO
 
@@ -479,16 +479,19 @@ El proyecto está organizado de la siguiente manera:
 
 - /application
 
-Contiene los cuadernos orquestados (01_server_load, 02_bronze_to_silver_tables, 03_gold_tables y 04_export_to_database) y los cuadenos no orquestados (appendix) utilizados para inicializar los recursos y explorar datos.
+Contiene los cuadernos orquestados (*01_server_load*, *02_bronze_to_silver_tables*, *03_gold_tables* y *04_export_to_database*) y los cuadenos no orquestados (*appendix*) utilizados para inicializar los recursos y explorar datos.
 
 - /application/lib
 
 Contiene las clases concretas e interfaces utilizadas por los procesos principales:
 
-a) Gateways para interactuar con la Base de Datos (archivos Delta de Databricks) y archivos planos.
-b) Hooks de preprocesamiento en la capa audit.
-c) Interactors para activos de datos, tablas de gobierno, llaves surrogadas y validaciones.
-d) Plantillas y sus fabricas abstractas utilizadas en el procesamiento de tablas.
+a) *Gateways* para interactuar con la Base de Datos (archivos Delta de Databricks) y archivos planos.
+
+b) *Hooks* de preprocesamiento en la capa audit.
+
+c) *Interactors* para activos de datos, tablas de gobierno, llaves surrogadas y validaciones.
+
+d) Plantillas y sus fábricas abstractas utilizadas para el procesamiento de tablas.
 
 - /files
 
@@ -523,3 +526,235 @@ Contiene las imagenes utilizadas en el archivo README.md
 Contiene la estructura de archivos utilizada en el servidor real, se utiliza como almacenamiento temporal para emular la carga al servidor y su posterior respaldo y depuración.
 
 ## 5.- DISCUSION Y MEJORAS
+
+En esta última sección se discute algunos aspectos técnicos y posibles implementaciones a futuro.
+
+### Enfoque de Metadatos
+
+El enfoque de metadatos fue muy útil para ejecutar tareas repetitivas, nuevos archivos que tengan patrones similares podrían ser procesados rápidamente y se tendría un éstandar para documentación. La dificultad es que se tienen que implementar validaciones de los archivos YAML y comunmente habrá situaciones que se salgan de los patrones comunes, sin embargo para estos últimos se puede hacer uso de **Hooks** como se hizo en el proceso de auditoria.
+
+Como trabajo a futuro quedaría plantear cómo se pueden especificar los *hooks*, las tablas oro y los entregables en los metádos.
+
+### Arquitectura de Software
+
+Se procuró seguir los principios *SOLID* y los principios de desarrollo de componentes, aunque quedaron partes pendientes de refactorizar y algunas podrían mejorarse, algunas características de la arquitectura son:
+
+- Uso de plantillas (patrón de diseño **template**) para el procesamiento entre las capas *land* y *raw*; *raw* y *audit*; así como *audit* e *historic*, las plantillas contienen un método principal que se encarga de ejecutar ordenadamente los métodos a cargo de las actividades específicas, uno de estos métodos ejecuta el *hook* del que se hablaŕa en la siguiente sección.
+
+~~~python
+#INTERFACE FOR THE TEMPLETE
+class InterfaceRawToAuditTemplate(ABC):
+
+    #@abstractmethod
+    def set_component_factory(self, component_factory: AbstractFactoryRawToAudit):
+        pass
+
+    @abstractmethod
+    def process(self):
+        pass
+
+#IMPLEMENTATION FOR THE TEMPLATE
+class RawToAuditTemplate(InterfaceRawToAuditTemplate):
+
+    def __init__(self, catalog_name: str, schema_name: str, table_name: str, rundate: str, batch_id: str):
+        ...
+        
+    def set_component_factory(self, component_factory: AbstractFactoryRawToAudit):
+        self.governance_interactor = component_factory.governance_interactor
+        self.asset_interactor = component_factory.asset_interactor
+        self.hash_key_interactor = component_factory.hash_key_interactor
+        self.facade_screen_validator = component_factory.facade_screen_validator
+        self.hook_preprocessing = component_factory.hook_preprocessing
+  
+    def process(self):
+
+        #EXTRACTION STEPS
+        self.extract_metadata()
+        self.extract_table()
+
+        #PROCESSING STEPS
+        self.rename_columns()
+        self.apply_hook_preprocessing()
+        self.validate_screens()
+        self.cast_data_types()
+        self.add_metadata()
+        self.generate_errors_dataframe()
+        self.discard_primary_key_errors()
+
+        #EXPORTING STEPS
+        self.write_table()
+        self.get_accumulated_rows()
+        self.generate_ingestion_metrics()
+        self.write_metrics()
+        self.write_errors()
+~~~
+
+- Uso de fábricas abstractas (patrón de diseño **abstract factory**) para crear los grupos de objectos que las platillas necesitan para funcionar.
+
+~~~python
+#ABTRACT FACTORY WITH METHODS TO BE IMPLEMENTED
+class AbstractFactoryRawToAudit(ABC):
+
+    @abstractmethod
+    def create(self):
+        pass
+
+#CONCRETE FACTORY FOR VISITS
+class FactoryRawToAuditForVisit(AbstractFactoryRawToAudit):
+
+    def __init__(self):
+        pass
+        
+    def create(self):
+
+        database_gateway = SparkSQLDatabaseGateway()
+  
+        self.governance_interactor = GovernanceInteractor(database_gateway=database_gateway)
+        self.asset_interactor = AssetInteractor(database_gateway=database_gateway)
+        self.hash_key_interactor = HashKeyInteractor()
+        self.facade_screen_validator = FacadeScreenValidator()
+        self.hook_preprocessing = HookVisitsPreprocessing()
+~~~
+
+- Uso de clases especializadas para exteder la funcionalidad sin comprometer la funcionalidad base:
+
+~~~python
+class InterfaceScreenValidator(ABC):
+
+    @abstractmethod
+    def filter(self):
+        pass
+
+    @abstractmethod
+    def get_validation_code(self) -> str:
+        pass
+
+    @abstractmethod
+    def validate(self):
+        pass
+
+class AbstractScreenValidator(InterfaceScreenValidator):
+
+    def __init__(self, dataframe, column, dataframe_errors):
+        ...
+        self.validation_code = self.get_validation_code()
+
+    @abstractmethod
+    def filter(self):
+        pass
+
+    @abstractmethod
+    def get_validation_code(self) -> str:
+        pass
+
+    def validate(self):
+
+        print('Validating column: ' + self.column + ' with screen ' + self.validation_code)
+        
+        fails = self.filter()
+        fails = fails.select('row_temp_id', self.column)
+        fails = fails.withColumnRenamed(self.column, 'value')
+        fails = fails.withColumn('screen_code', lit(self.validation_code))
+        fails = fails.withColumn('column_name', lit(self.column))
+        fails = fails.withColumn('value', col('value').cast(StringType()))
+
+        ...
+    
+class IsNotNullScreenValidator(AbstractScreenValidator):
+
+    def filter(self):
+        return self.dataframe.where(col(self.column).isNull()).select('row_temp_id', self.column)
+
+    def get_validation_code(self):
+        return 'is_not_null'
+    
+class IsEmailFormatScreenValidator(AbstractScreenValidator):
+
+    def filter(self):
+        return self.dataframe.where(~regexp_extract(col(self.column), r'^.+@.+\..+$', 0).cast('string').isNotNull())
+
+    def get_validation_code(self):
+        return 'is_email_format'
+
+~~~
+
+También se procuró separar los componentes tal que las clases de alto nivel no tuvieran **dependencias** hacia las clases de bajo nivel, lo cual en el futuro deberá facilitar el mantenimiento o la extensión de funcionalidad.
+
+### Uso de Hooks
+
+Los *hooks* resultaron muy utiles para atender situaciones muy específicas, además permiten extender la funcionalidad sin alterar las clases base:
+
+~~~python
+#INTERFACE FOR PREPROCESSIG STEPS IN THE RAW TO AUDIT PROCESS
+class InterfaceHookRawToAuditPreprocessing(ABC):
+
+    @abstractmethod
+    def transform(self) -> DataFrame:
+        pass
+
+#HOOK FOR VISITS
+class HookVisitsPreprocessing(InterfaceHookRawToAuditPreprocessing):
+
+    def __init__(self):
+        pass
+
+    def transform(self, dataframe):
+
+        columns = ['FechaOpen', 'FechaClick', 'Links', 'IPs', 'Navegadores', 'Plataformas']
+        for column in columns:
+            dataframe = dataframe.withColumn(column, regexp_replace(col(column), 'unknown', ''))
+            dataframe = dataframe.withColumn(column, when(col(column) == '-', lit(None)).otherwise(col(column)))
+            dataframe = dataframe.withColumn(column, when(col(column) == '', lit(None)).otherwise(col(column)))
+
+        columns = ['Links', 'IPs', 'Navegadores', 'Plataformas']
+        for column in columns:
+            dataframe = dataframe.withColumn(column, convert_to_json_string_udf(col(column)))
+
+        return dataframe
+~~~
+
+El *hook* anterior se utilizó para preprocesar la tabla visitas en la capa de auditoría, se incorporó a la platilla mediante su **fábrica abstracta**.
+
+### Llaves Surrogadas
+
+Para las primeras tablas se utilizaron **llaves incrementales**, sin embargo esto en Databricks es particularmente lento por qué se tienen que hacer muchas consultas por separado, posteriormente se utilizaron campos **hash** generados a partir de las columnas base, lo cual ya no requiere el uso de consultas para determinar llaves existentes o saber si se tiene que generar una nueva.
+
+### Llaves Primarias
+
+Para futuras versiones se tendría que mejorar la gestión de llaves primarias, en particular los registros con errores de este tipo fueron los unicos descartados por qué provocaban errores con los mecanismos **MERGE** de las tablas Delta. También se tiene que soportar casos donde haya llaves primarias de dos o más columnas.
+
+### Tablas Históricas
+
+Un detalle importante con la implementación actual es que se sobreescribe por completo la tabla de la capa histórica, lo cual no será factible en tablas grandes, habría que definir a qué tablas se aplica esta funcionalidad o encontrar una manera de no sobreescribir todo. Adicionalmente hicieron falta pruebas para otros escenarios, como la eliminación suave.
+
+### Versionado de Tablas
+
+Si bien en los metadatos existe una especificación para la versión, aún no hay soporte para esta funcionalidad, sin embargo podría ser bueno que mediante el uso de integración continua se puedan agregar nuevas versiones que en automático puedan manejar los cambios a una tabla.
+
+### Campos con datos personales
+
+Si bien en los metadatos también existe esta especificación para el *Email* del ejercicio, no se ejecutó ninguna acción al respecto, habría que plantear algún mecanismo de **encriptación** y **desencriptación** así como políticas de quien puede acceder a estos campos (parte de esta información podría ser integrada en los metadatos).
+
+### Particionado
+
+Al igual que los dos puntos anteriores, no hay aún soporte para particiones especificadas en los metadatos. Por default se particionó considerando la columna *metatadata_batch_id* para las capa *raw*.
+
+### Llaves Foraneas y Validaciones entre Tablas
+
+En esta versión no hay soporte para validaciones que impliquen múltiples tablas, se tendría que plantear cómo especificar las validaciones e implementarlas.
+
+### Soporte para otros Formatos de Tabla
+
+En esta implementación existe una dependencia total hacia los *dataframes* de Pyspark, si se quisiera tener soporte para manejo de otros tipos de *dataframe* como *pandas* o algún otro motor **big data** un posible planteamiento es mediante el uso de *dataclass* abstractos que contengan una interfaz de *dataframe* y delegar a subclases concretas para cada motor la funcionalidad particular. Sin embargo este enfoque podría complicarse en casos donde existan muchos casos de uso o no todos los motores manejen la misma funcionalidad.
+
+### Soporte para Tipos de Escritura
+
+Considerar casos donde haya otros tipos de escritura o se necesiten otros mecanismos *merge* para las tablas Delta.
+
+### Manejo de Errores
+
+En la implementación actual solo se hace un etiquetado de errores, en futuras versiones este mecanismo se debe hacer más robusto, posiblemente se puedan incorporar reglas para casos específicos así como la actualización de los eventos de error en caso de que en el futuro llegue alguna corrección.
+
+
+
+
