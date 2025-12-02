@@ -3,9 +3,13 @@
 ## CONTENIDO
 
   1 - Propuesta de Solución
+
   2 - Perfilamiento de Datos
+
   3 - ETL
+
   4 - Estructura del Repositorio
+  
   5 - Discusión y Mejoras
   
 ## 1.- PROPUESTA DE SOLUCIÓN
