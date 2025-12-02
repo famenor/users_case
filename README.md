@@ -470,3 +470,9 @@ WHERE batch_id IN (SELECT batch_id FROM filter)
 ~~~
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/33_event_errors.jpg)
+
+El cuaderno 04_export_to_database contiene el código orquestado de esta sección, también hay una copia de los **entregables** con formato CSV en la carpeta /local_device/home/mysql.
+
+## 4.- ESTRUCTURA DEL REPOSITORIO
+
+## 5.- DISCUSION Y MEJORAS
