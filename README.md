@@ -64,7 +64,7 @@ La creación de las tablas de gobierno de datos (metadatos y métricas) se imple
 
 En la sección anterior se mostraron dos tablas de gobierno con datos referentes a las tablas ingestadas y sus columnas, esta información se capturó a partir de archivos YAML en los que describe el estado deseado de la tabla antes de ser procesada, si bien este enfoque puede ser complicado de implementar, es posible facilitar tareas repetitivas y mejorar la documentación de los activos de datos. 
 
-Para este ejercicio se se implementó un enfoque declarativo para algunas de las actividades más comunes y repetivas, se propuso el siguiente formato:
+Para este ejercicio se implementó un enfoque declarativo para algunas de las tareas más comunes y repetitivas, se propuso el siguiente formato:
 
 ~~~YAML
 name: visitas
@@ -262,7 +262,7 @@ layers:
         track_changes: True
 ~~~
 
-Para la capa **raw** se capturan llaves primarias, si es dato personal, particiones, tipos de dato originales y el comentario de la columna; para la capa **audit** se especifican renombres, validaciones y tipos de dato finales; mientras que para la capa **historic** se especifican qué columnas serán seguidas para control de cambios. En algunos casos la información de una capa se replica a la capa siguiente cuando esta sea necesaria y asi evitar capturarla dos veces (pero se puede especificar si necesita cambiarse para la siguiente capa).
+Para la capa **raw** se capturan llaves primarias, si es dato personal, particiones, tipos de dato originales y el comentario de la columna; para la capa **audit** se especifican renombres, validaciones y tipos de dato finales; mientras que para la capa **historic** se especifican qué columnas serán seguidas para control de cambios. En algunos casos la información de una capa se replica a la capa siguiente cuando ésta sea necesaria y así evitar capturarla dos veces (pero se puede especificar si necesita cambiarse para la siguiente capa).
 
 En el cuaderno appendix_b_metadata_manager se realizó la ingesta de los metadatos especificados en el archivo YAML hacia las tablas de gobierno de datos correspondientes.
 
