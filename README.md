@@ -323,11 +323,11 @@ El proceso ETL se dividió en 4 pasos que serán detallados en esta sección.
 
 ### A) Carga al Servidor
 
-Primero se copian los archivos de la fuente externa (carpeta files) hacia el servidor (carpeta server_device) y la zona landing del lakehouse (carpeta lakehouse/landing):
+Primero se copian los archivos de la fuente externa (carpeta files) hacia el servidor (carpeta server_device) y hacia la zona landing del **lakehouse** (carpeta lakehouse/landing):
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/15_carga_servidor.jpg)
 
-Después se crea una carpeta ZIP con el **respaldo** en almacenamiento local (carpeta local_device):
+Después se crea un archivo ZIP con el **respaldo** de los archivos fuente y se guarda en el almacenamiento local (carpeta local_device):
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/16_zip.jpg)
 
@@ -339,13 +339,13 @@ El cuaderno 01_server_load contiene el código orquestado de esta sección.
 
 ### B) Generación de Tablas Bronce y Plata
 
-El segundo proceso comienza buscando todos los batches (o archivos) asociados al rundate, si el batch ya ha sido procesado entonces este será omitido:
+El segundo proceso comienza buscando todos los batches (o archivos) asociados al rundate, si el batch ya ha sido procesado entonces éste será omitido:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/18_no_reprocesar.jpg)
 
 Si el batch no ha sido procesado, entonces se ejecuta lo siguiente para la capa **RAW**:
 
-- Extraer metadatos y tabla fuente (capa landing).
+- Extraer metadatos (de tablas de gobierno) y tabla fuente (de capa landing).
 - Validar que las columnas empaten con las declaradas en los metadatos.
 - Aplicar los tipos de datos definidos en los metadatos, estos tipos de datos no son finales, son los necesarios para poder almacer el dato aún con posibles errores.
 - Validar que las columnas declaradas como no nulas tengan datos completos.
@@ -363,12 +363,51 @@ Y las métricas de ingesta hacia la capa raw de los tres batches:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/21_metrica_raw.jpg)
 
-También se muestra como los comentarios capturados en los metadados YAML ahora están disponibles en el **catálogo** de Databricks:
+También se muestra cómo los comentarios capturados en los metadados YAML ahora están disponibles en el **catálogo** de Databricks:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/22_comentarios.jpg)
 
-~~~python
-        #CHECK NULL VALUES
+Posteriormente se procede a generar la tabla de capa **audit**, ejecutando lo siguiente:
 
+- Extraer metadatos (de tablas de gobierno) y tabla cruda (de capa raw).
+- Renombrar columnas conforme a lo declarado los metadatos.
+- Aplicar preprocesamiento específico.
+- Aplicar las validaciones declaradas en los metadatos.
+- Castear columnas con tipos de dato finales declarados en los metadatos.
+- Generar métricas de extracción.
+- Exportar tabla (hacia capa audit) y métricas.
 
-~~~
+![](https://github.com/famenor/users_case/blob/main/pictures/23_raw_to_audit.jpg)
+
+A continuación se muestra el mismo registro de la capa anterior, esta vez con los campos erroneos anulados y con una etiqueta que indica que no pasó la **auditoria**, otros campos que tenías guiones fueron sustituidos por valores nulos:
+
+![](https://github.com/famenor/users_case/blob/main/pictures/24_tabla_audit.jpg)
+
+en la bitácora de errores se almacenan los problemas encontrados:
+
+![](https://github.com/famenor/users_case/blob/main/pictures/25_errores_audit.jpg)
+
+Y las métricas de ingesta hacia la capa audit de los tres batches:
+
+![](https://github.com/famenor/users_case/blob/main/pictures/26_metrica_audit.jpg)
+
+Finalmente se procede a generar la tabla de capa **historic** ejecutando lo siguiente:
+
+- Extraer metadatos (de tablas de gobierno) y tabla limpia (de capa audit, considerando solo registros que hayan cumplido la auditoría).
+- Consolidar cambios históricos, se generan registros cada vez que uno de los campos marcados para seguimiento tenga algún cambio.
+- Generar métricas de procesamiento.
+- Exportar tabla (hacia capa historic) y métricas.
+
+![](https://github.com/famenor/users_case/blob/main/pictures/27_audit_to_historic.jpg)
+
+En la tabla histórica existen tres campos especiales para indicar si es el más reciente y las fechas de validez:
+
+![](https://github.com/famenor/users_case/blob/main/pictures/28_tabla_historic.jpg)
+
+También se generan métricas de ingesta:
+
+![](https://github.com/famenor/users_case/blob/main/pictures/29_metrica_historic.jpg)
+
+En este punto se han generado las tablas auditadas e históricas que servirán para construir las tablas de consumo final, el cuaderno 02_bronze_to_silver_tables contiene el código orquestado de esta sección.
+
+### C) Generación de Tablas Oro
