@@ -9,7 +9,7 @@
   3 - ETL
 
   4 - Estructura del Repositorio
-  
+
   5 - Discusión y Mejoras
   
 ## 1.- PROPUESTA DE SOLUCIÓN
@@ -278,7 +278,7 @@ Las tablas intermedias serán almacenadas en el **lakehouse** de Databricks sigu
 
 - Tabla *visitor* con conteos de visitas por usuario.
 - Tabla *statistics* con los registros recibidos en cada *batch*.
-- Table *event_errors* con los registros de la bitacora de errores.
+- Table *event_errors* con los registros de la bitácora de errores.
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/09_tablas_duckdb.jpg)
 
