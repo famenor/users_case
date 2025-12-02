@@ -20,9 +20,13 @@ Se utilizó una arquitectura de **medallero**, donde cada nivel tiene sus propia
 | Silver | Historic | Almacenar la versión histórica de la tabla auditada, se descartan registros que no hayan cumplido la auditoria. |
 | Gold | Analytics | Almacenar tablas que necesiten transformaciones para su consumo final. |
 
+Los se organizaron con una estructura de tres niveles, siguiendo la convención CATALOGO.ESQUEMA.TABLA
 
+Un catálogo se compone por el dominio y el ambiente de trabajo, se crearon tres catálogos:
+
+![](https://github.com/famenor/users_case/blob/main/pictures/01_catalogos.jpg)
   
- 
+  
 ## 1.- PERFILAMIENTO DE DATOS
 
 Se recibieron 5 archivos con datos de la aseguradora, lo primero que se hizo fue hacer un análisis de perfilamiento, a continuación se presenta un resumen de este análisis (se puede revisar el analisis completo en el cuaderno https://github.com/famenor/insurance_case/blob/main/appendix_a_profiling.ipynb )
