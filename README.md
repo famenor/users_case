@@ -319,7 +319,53 @@ En el cuaderno appendix_d_profiling se encuentra el perfilamiento realizado.
 
 ## 3.- ETL
 
+El proceso ETL se dividió en 4 pasos que serán detallados en esta sección.
 
+### A) Carga al Servidor
+
+Primero se copian los archivos de la fuente externa (carpeta files) hacia el servidor (carpeta server_device) y la zona landing del lakehouse (carpeta lakehouse/landing):
+
+![](https://github.com/famenor/users_case/blob/main/pictures/15_carga_servidor.jpg)
+
+Después se crea una carpeta ZIP con el **respaldo** en almacenamiento local (carpeta local_device):
+
+![](https://github.com/famenor/users_case/blob/main/pictures/16_zip.jpg)
+
+Finalmente se eliminan los archivos del servidor (carpeta server_device):
+
+![](https://github.com/famenor/users_case/blob/main/pictures/17_depurar_servidor.jpg)
+
+El cuaderno 01_server_load contiene el código orquestado de esta sección.
+
+### B) Generación de Tablas Bronce y Plata
+
+El segundo proceso comienza buscando todos los batches (o archivos) asociados al rundate, si el batch ya ha sido procesado entonces este será omitido:
+
+![](https://github.com/famenor/users_case/blob/main/pictures/18_no_reprocesar.jpg)
+
+Si el batch no ha sido procesado, entonces se ejecuta lo siguiente para la capa **RAW**:
+
+- Extraer metadatos y tabla fuente (capa landing).
+- Validar que las columnas empaten con las declaradas en los metadatos.
+- Aplicar los tipos de datos definidos en los metadatos, estos tipos de datos no son finales, son los necesarios para poder almacer el dato aún con posibles errores.
+- Validar que las columnas declaradas como no nulas tengan datos completos.
+- Agregar comentarios de columnas.
+- Generar métricas de extracción.
+- Exportar tabla (hacia capa raw) y métricas.
+
+![](https://github.com/famenor/users_case/blob/main/pictures/19_land_to_raw.jpg)
+
+A continuación se muestra uno de los registros que contiene errores (en este caso intencionalmente introducidos) para resaltar que en esta capa se conservan los datos como venían originalmente:
+
+![](https://github.com/famenor/users_case/blob/main/pictures/20_tabla_raw.jpg)
+
+Y las métricas de ingesta hacia la capa raw de los tres batches:
+
+![](https://github.com/famenor/users_case/blob/main/pictures/21_metrica_raw.jpg)
+
+También se muestra como los comentarios capturados en los metadados YAML ahora están disponibles en el **catálogo** de Databricks:
+
+![](https://github.com/famenor/users_case/blob/main/pictures/22_comentarios.jpg)
 
 ~~~python
         #CHECK NULL VALUES
