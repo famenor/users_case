@@ -2,7 +2,11 @@
 
 ## CONTENIDO
 
-  1 - Perfilamiento de Datos
+  1 - Propuesta de Solución
+  2 - Perfilamiento de Datos
+  3 - Generación de Tablas Intermedias
+  4 - Entregables
+  5 - Discusión
   
 ## 1.- PROPUESTA DE SOLUCIÓN
 
@@ -18,9 +22,9 @@ Se utilizó una arquitectura de **medallero**, donde cada nivel tiene sus propia
 | Bronze | Raw | Almacenar en formato Delta los datos originales, consolidando las versiones que llegan en cada ejecución, se incorporan algunos metadatos. |
 | Silver | Audit | Almacenar los datos limpios y auditados, no se elimina ningún registro excepto aquellos que violen su llave primaria, los demás datos erroneos se anulan y se guardan en una bitácora de eventos de error. |
 | Silver | Historic | Almacenar la versión histórica de la tabla auditada, se descartan registros que no hayan cumplido la auditoria. |
-| Gold | Analytics | Almacenar tablas que necesiten transformaciones para su consumo final. |
+| Gold | Gold | Almacenar tablas que necesiten transformaciones para su consumo final. |
 
-Los se organizaron con una estructura de tres niveles, siguiendo la convención CATALOGO.ESQUEMA.TABLA
+Los datos se organizaron con una estructura de tres niveles, siguiendo la convención CATALOGO.ESQUEMA.TABLA
 
 Un **catálogo** se compone por el dominio y el ambiente de trabajo, se crearon tres catálogos:
 
@@ -36,7 +40,7 @@ Una **tabla** se compone por la capa y el nombre plano de la tabla, excepto en e
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/03_tablas.jpg)
 
-También se generó una tabla de gobierno de datos que almanena las principales especificaciones de las columnas que serán ingestadas:
+También se generó una tabla de gobierno de datos que almacena las principales especificaciones de las columnas que serán ingestadas:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/04_tablas_detalle.jpg)
 
@@ -50,15 +54,231 @@ mientras que la segunda tabla almacena los eventos de error (bitácora):
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/06_eventos_error.jpg)
 
-ACLARACIÓN: Con excepción del error de llave primera, los demás errores fueron introducidos deliberadamente para fines del ejercicio.
+Se aclara que con excepción del error de llave primeria, los demás errores fueron introducidos deliberadamente para fines del ejercicio.
 
 La creación de las tablas de gobierno de datos (metadatos y métricas) se implementó en el cuaderno appendix_a_init_governance, a continuación se muestra una captura en la sección de catálogos de Databricks donde se muestran los catálogos, esquemas y tablas de gobierno creados:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/07_tablas_gobierno.jpg)
 
+### Enfoque de metadatos
 
+En la sección anterior se mostraron dos tablas de gobierno con datos referentes a las tablas ingestadas y sus columnas, esta información se capturó a partir de archivos YAML en los que describe el estado deseado de la tabla antes de ser procesada, si bien este enfoque puede ser complicado de implementar, es posible facilitar tareas repetitivas y mejorar la documentación de los activos de datos. 
 
-  
+Para este ejercicio se se implementó un enfoque declarativo para algunas de las actividades más comunes y repetivas, se propuso el siguiente formato:
+
+~~~YAML
+name: visitas
+layers:
+  raw:
+    write_mode: overwrite_partition
+    version: 1
+    description: Metrics of user visits as in the original source
+    owner: armando.n90@gmail.com
+    retention_policy: permanent
+    schema:
+      email:
+        data_type: string
+        is_pii: True
+        is_primary_key: True
+        is_nullable: False
+        is_partition: False
+        comment: 'Email of the user'
+      jyv:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'No description provided'
+      Badmail:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'Indicates if the email could not be validates'
+      Baja:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'No description provided'
+      Fechaenvio:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'Date when the metrics were sent'
+      Fechaopen:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'Date when the page was open'
+      Opens:
+        data_type: integer
+        is_nullable: True
+        is_partition: False
+        comment: 'Amount of opens'
+      Opensvirales:
+        data_type: integer
+        is_nullable: True
+        is_partition: False
+        comment: 'Amount of massive opens'
+      Fechaclick:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'Date when the clicks were executed'
+      Clicks:
+        data_type: integer
+        is_nullable: True
+        is_partition: False
+        comment: Amount of clicks'
+      Clicksvirales:
+        data_type: integer
+        is_nullable: True
+        is_partition: False
+        comment: 'Amount of massive clicks'
+      Links:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'Links'
+      IPs:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'Logical Addresses'
+      Navegadores:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'Browsers'
+      Plataformas:
+        data_type: string
+        is_nullable: True
+        is_partition: False
+        comment: 'Platforms'
+  audit:
+    write_mode: merge_incremental
+    version: 1
+    description: Metrics of user visits audited
+    owner: armando.n90@gmail.com
+    retention_policy: permanent
+    schema:
+      Email:
+        rename_from: email
+        validations:
+          - validation: is_not_null
+          - validation: is_email_format
+      Jyv:
+        rename_from: jyv
+      Badmail:
+        validations:
+          - validation: is_in_list
+            allowed: 'HARD'
+      Baja:
+        validations:
+          - validation: is_in_list
+            allowed: 'SI'
+      FechaEnvio:
+        rename_from: Fechaenvio
+        data_type: timestamp
+        validations:
+          - validation: is_date_format
+            format: 'dd/MM/yyyy HH:mm'
+      FechaOpen:
+        rename_from: Fechaopen
+        data_type: timestamp
+        validations:
+          - validation: is_date_format
+            format: 'dd/MM/yyyy HH:mm'
+      Opens:
+        validations:
+          - validation: is_in_bounds
+            min_allowed: 0
+            max_allowed: 20
+      OpensVirales:
+        rename_from: Opensvirales
+        validations:
+          - validation: is_in_bounds
+            min_allowed: 0
+            max_allowed: 20
+      FechaClick:
+        rename_from: Fechaclick
+        data_type: timestamp
+        validations:
+          - validation: is_date_format
+            format: 'dd/MM/yyyy HH:mm'
+      Clicks:
+        validations:
+          - validation: is_in_bounds
+            min_allowed: 0
+            max_allowed: 20
+      ClicksVirales:
+        rename_from: Clicksvirales
+        validations:
+          - validation: is_in_bounds
+            min_allowed: 0
+            max_allowed: 20
+      Links:
+        rename_from: Links
+      IPs:
+        rename_from: IPs
+      Navegadores:
+        rename_from: Navegadores
+      Plataformas:
+        rename_from: Plataformas
+  historic:
+    write_mode: historic
+    version: 1
+    description: Metrics of user visits with history
+    owner: armando.n90@gmail.com
+    retention_policy: permanent
+    schema:
+      Email:
+        track_changes: True
+      Jyv:
+        track_changes: True
+      Badmail:
+        track_changes: True
+      Baja:
+        track_changes: True
+      FechaEnvio:
+        track_changes: True
+      FechaOpen:
+        track_changes: True
+      Opens:
+        track_changes: True
+      OpensVirales:
+        track_changes: True
+      FechaClick:
+        track_changes: True
+      Clicks:
+        track_changes: True
+      ClicksVirales:
+        track_changes: True
+      Links:
+        track_changes: True
+      IPs:
+        track_changes: True
+      Navegadores:
+        track_changes: True
+      Plataformas:
+        track_changes: True
+~~~
+
+Para la capa **raw** se capturan llaves primarias, si es dato personal, particiones, tipos de dato originales y el comentario de la columna; para la capa **audit** se especifican renombres, validaciones y tipos de dato finales; mientras que para la capa **historic** se especifican qué columnas serán seguidas para control de cambios. En algunos casos la información de una capa se replica a la capa siguiente cuando esta sea necesaria y asi evitar capturarla dos veces (pero se puede especificar si necesita cambiarse para la siguiente capa).
+
+En el cuaderno appendix_b_metadata_manager se realizó la ingesta de los metadatos especificados en el archivo YAML hacia las tablas de gobierno de datos correspondientes.
+
+![](https://github.com/famenor/users_case/blob/main/pictures/08_ingesta_metadatos.jpg)
+
+### Almacenamiento
+
+Las tablas intermedias serán almacenadas en el lakehouse de Databricks siguiendo las convensiones antes mencionadas, para la Base de Datos de entregables se utilizará el motor de DuckDB para emular la Base de Datos en MySQL, las sentencias SQL utilizadas son compatibles entre ambos motores. La creación de tablas se ejecutó en el cuaderno appendix_c_init_data_base:
+
+- Tabla visitor con conteos de visitas por usuario.
+- Tabla statistics con los registros recibidos en cada batch.
+- Table event_errors con los registros de la bitacora de errores.
+
+![](https://github.com/famenor/users_case/blob/main/pictures/09_tablas_duckdb.jpg)
+
+### Orquestación 
 
 ~~~python
         #CHECK NULL VALUES
