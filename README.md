@@ -6,13 +6,13 @@
   2 - Perfilamiento de Datos
   3 - ETL
   4 - Estructura del Repositorio
-  5 - Discusión
+  5 - Discusión y Mejoras
   
 ## 1.- PROPUESTA DE SOLUCIÓN
 
 En este ejercicio se implementó un ETL que procesa una tabla con datos de visitas de usuarios y genera tablas para consumo final. Los datos se procesaron mediante la herramienta **Pyspark**, la cual se ejecutó mediante **Databricks**.
 
-### Arquitectura
+### Arquitectura de Datos
 
 Se utilizó una arquitectura de **medallero**, donde cada nivel tiene sus propias capas:
 
@@ -20,7 +20,7 @@ Se utilizó una arquitectura de **medallero**, donde cada nivel tiene sus propia
 |---|---|---|
 | Bronze | Landing | Almacenar los datos originales, sin ningún cambio salvo que sea necesario para poderlo almacenar. |
 | Bronze | Raw | Almacenar en formato Delta los datos originales, consolidando las versiones que llegan en cada ejecución, se incorporan algunos metadatos. |
-| Silver | Audit | Almacenar los datos limpios y auditados, no se elimina ningún registro excepto aquellos que violen su llave primaria, los demás datos erroneos se anulan y se guardan en una bitácora de eventos de error. |
+| Silver | Audit | Almacenar los datos limpios y auditados en formato Delta, no se elimina ningún registro excepto aquellos que violen su llave primaria, los demás datos erroneos se anulan y se guardan en una bitácora de eventos de error. |
 | Silver | Historic | Almacenar la versión histórica de la tabla auditada, se descartan registros que no hayan cumplido la auditoria. |
 | Gold | Gold | Almacenar tablas que necesiten transformaciones para su consumo final. |
 
@@ -280,7 +280,7 @@ Las tablas intermedias serán almacenadas en el **lakehouse** de Databricks sigu
 
 ### Orquestación 
 
-El ETL se dividió en 4 etapas que más adelante se detallarán, cada etapa se ejecuta en un cuaderno en Databricks, para ejecutarlas se creó una **canalización**, la cual está representada en el siguiente grafo:
+El ETL se dividió en 4 etapas que más adelante se detallarán, cada etapa se ejecuta en un cuaderno de Databricks, para ejecutarlas se creó una **canalización**, la cual está representada en el siguiente grafo:
 
 ![](https://github.com/famenor/users_case/blob/main/pictures/10_canalizacion.jpg)
 
@@ -295,6 +295,30 @@ En un ambiente productivo solo sería necesario un **DAG** programado para ejecu
 ![](https://github.com/famenor/users_case/blob/main/pictures/12_airflow.jpg)
 
 ## 2.- PERFILAMIENTO DE DATOS
+
+El perfil de los datos es un paso importante con el cual fue posible definir parte de los metadados, validaciones y tipos de datos necesarios durante el procesamiento.
+
+A continuación se listan algunos problemas encontrados.
+
+- En el batch 7 hay dos registros con el mismo Email, para este ejercicio se asumurá que no se puede repetir un Email en el mismo batch.
+- Las columnas no estaban homologadas, concretamente las columnas jk y fhg se renombraron por jyv:
+
+![](https://github.com/famenor/users_case/blob/main/pictures/13_perfil_columnas.jpg)
+
+- La columns jvy tiene todos los valores nulos.
+- Badmail puede ser nulo o HARD.
+- Baja puede ser nulo o SI.
+- En algunas columnas el valor nulo está representado por un guión medio.
+- Fechas de envio, open y click tienen fechas con formato dd/MM/yyyy HH:mm
+- Opens, Opens virales, Clicks y Clicks virales son enteros con valores entre 0 y 10.
+- Links, IPs, Navegadores y Plataformas contienen arreglos o valores simples, sin embargo a veces hay valores Unknown o elementos nulos en las listas:
+
+![](https://github.com/famenor/users_case/blob/main/pictures/14_perfil_arreglos.jpg)
+
+En el cuaderno appendix_d_profiling se encuentra el perfilamiento realizado.
+
+## 3.- ETL
+
 
 
 ~~~python
