@@ -282,7 +282,7 @@ Las tablas intermedias serán almacenadas en el **lakehouse** de Databricks sigu
 
 El ETL se dividió en 4 etapas que más adelante se detallarán, cada etapa se ejecuta en un cuaderno en Databricks, para ejecutarlas se creó una **canalización**, la cual está representada en el siguiente grafo:
 
-![](https://github.com/famenor/users_case/blob/main/pictures/10_tablas_duckdb.jpg)
+![](https://github.com/famenor/users_case/blob/main/pictures/10_canalizacion.jpg)
 
 Los notebooks necesitan un **rundate** para saber qué archivos o tablas van a procesar, el rundate 20130208_000000 procesa los archivos con batches 7 y 8; mientras que el rundate 20130214_000000 procesa el archivo con batch 9.
 
