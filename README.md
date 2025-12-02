@@ -475,4 +475,51 @@ El cuaderno 04_export_to_database contiene el código orquestado de esta secció
 
 ## 4.- ESTRUCTURA DEL REPOSITORIO
 
+El proyecto está organizado de la siguiente manera:
+
+- /application
+
+Contiene los cuadernos orquestados (01_server_load, 02_bronze_to_silver_tables, 03_gold_tables y 04_export_to_database) y los cuadenos no orquestados (appendix) utilizados para inicializar los recursos y explorar datos.
+
+- /application/lib
+
+Contiene las clases concretas e interfaces utilizadas por los procesos principales:
+
+a) Gateways para interactuar con la Base de Datos (archivos Delta de Databricks) y archivos planos.
+b) Hooks de preprocesamiento en la capa audit.
+c) Interactors para activos de datos, tablas de gobierno, llaves surrogadas y validaciones.
+d) Plantillas y sus fabricas abstractas utilizadas en el procesamiento de tablas.
+
+- /files
+
+Contiene los archivos originales organizados por rundate, estas carpetas representan lo que en producción sería enviado hacia el servidor.
+
+- /lakehouse/governance
+
+Contiene los archivos YAML con la especificacion de los metadatos.
+
+- /lakehouse/landing
+
+Contiene los archivos de la capa landing que serán el punto de inicio para el ETL.
+
+- /local_device/home/etl
+
+Contiene los archivos ZIP con los respaldos de los archivos cargados en el servidor.
+
+- /local_device/home/mysql
+
+Contiene la base de datos en duckdb utilizada para emular MySQL, así como una copia de los **entregables**.
+
+- /orquestacion
+
+Contiene los DAGs de Airflow utilizados para orquestar el ETL.
+
+- /pictures
+
+Contiene las imagenes utilizadas en el archivo README.md
+
+- /service_device
+
+Contiene la estructura de archivos utilizada en el servidor real, se utiliza como almacenamiento temporal para emular la carga al servidor y su posterior respaldo y depuración.
+
 ## 5.- DISCUSION Y MEJORAS
